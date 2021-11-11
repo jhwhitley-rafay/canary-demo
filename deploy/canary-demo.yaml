@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canary-demo-coffee
+  annotations:
+    rafay.dev/registry-ko8r76m: registry-rafay-us
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: canary-demo-coffee
+  template:
+    metadata:
+      labels:
+        app: canary-demo-coffee
+    spec:
+      containers:
+        - name: canary-demo-coffee
+          image: registry.rafay.us/canary-demo:coffee
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+      terminationGracePeriodSeconds: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canary-demo-tea
+  annotations:
+    rafay.dev/registry-ko8r76m: registry-rafay-us
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: canary-demo-tea
+  template:
+    metadata:
+      labels:
+        app: canary-demo-tea
+    spec:
+      containers:
+        - name: canary-demo-tea
+          image: registry.rafay.us/canary-demo:tea
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+      terminationGracePeriodSeconds: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: canary-demo-coffee
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+  selector:
+    app: canary-demo-coffee
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: canary-demo-tea
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+  selector:
+    app: canary-demo-tea
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: aws-alb
+spec:
+  controller: ingress.k8s.aws/alb
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: canary
+  annotations:
+    alb.ingress.kubernetes.io/actions.canary-deployment: >
+      {"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"canary-demo-coffee","servicePort":"http","weight":100},{"serviceName":"canary-demo-tea","servicePort":"http","weight":0}],"targetGroupStickinessConfig":{"enabled":true,"durationSeconds":15}}}
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/load-balancer-name: canary-deployment
+    alb.ingress.kubernetes.io/healthcheck-port: "80"
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/security-groups: sg-0a85c970ad19ef3f2
+    alb.ingress.kubernetes.io/subnets: subnet-09c1a231024b655bb, subnet-0fe263cf3c0eff5bb
+    alb.ingress.kubernetes.io/tags: Owner=Matt
+   #alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=true,stickiness.lb_cookie.duration_seconds=60
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+spec:
+  ingressClassName: "aws-alb"
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: canary-deployment
+                port:
+                  name: use-annotation

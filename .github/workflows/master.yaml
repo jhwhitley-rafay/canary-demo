@@ -1,0 +1,55 @@
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/**"
+      - "Dockerfile**"
+      - "nginx/**"
+
+jobs:
+  build:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Prepare Docker image tags
+        id: prepare_tag
+        env:
+          REGISTRY_HOST: ${{ secrets.REGISTRY_HOST }}
+          IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+        run: |
+          DOCKER_IMAGE_A=${REGISTRY_HOST}/${IMAGE_NAME}:coffee
+          DOCKER_IMAGE_B=${REGISTRY_HOST}/${IMAGE_NAME}:tea
+          echo ::set-output name=date_created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=docker_image_a::${DOCKER_IMAGE_A}
+          echo ::set-output name=docker_image_b::${DOCKER_IMAGE_B}
+      - name: Log in to Docker registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY_HOST }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build container image and push to Docker registry
+        uses: docker/build-push-action@v2
+        with:
+          file: Dockerfile.coffee
+          context: .
+          push: true
+          tags: ${{ steps.prepare_tag.outputs.docker_image_a }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prepare_tag.outputs.date_created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.repository }}
+      - name: Build container image and push to Docker registry
+        uses: docker/build-push-action@v2
+        with:
+          file: Dockerfile.tea
+          context: .
+          push: true
+          tags: ${{ steps.prepare_tag.outputs.docker_image_b }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.prepare_tag.outputs.date_created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.repository }}

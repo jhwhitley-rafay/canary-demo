@@ -1,19 +1,22 @@
-var ref;
+var reload;
+var timeOut = 2000;
 
 function checkRefresh() {
-    const refresh = document.cookie.split('; ').find(row => row.startsWith('refresh='));
-    if ( typeof refresh !== "undefined" ) {
+    const refresh = document.cookie.split('; ').find(row => row.startsWith('refresh=')).split('=')[1];
+    if ( refresh == "true" ) {
         document.getElementById("check").checked = true;
-        ref = setTimeout( function() { location.reload(); }, 1000 );
+        reload = setTimeout( function() { location.reload(); }, timeOut );
+    } else {
+        document.getElementById("check").checked = false;
     }
 }
 
 function changeCookie() {
     if ( document.getElementById("check").checked ) {
-        document.cookie = "refresh=1";
-        ref = setTimeout( function() { location.reload(); }, 1000 );
+        document.cookie = "refresh=true";
+        reload = setTimeout( function() { location.reload(); }, timeOut );
     } else {
-        document.cookie = "refresh=0";
-        clearTimeout(ref);
+        document.cookie = "refresh=false";
+        clearTimeout(reload);
     }
 }

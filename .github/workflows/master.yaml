@@ -35,7 +35,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: Dockerfile.coffee
-          context: ./build
+          context: /build
           push: true
           tags: ${{ steps.prepare_tag.outputs.docker_image_a }}
           labels: |
@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           file: Dockerfile.tea
-          context: ./build
+          context: /build
           push: true
           tags: ${{ steps.prepare_tag.outputs.docker_image_b }}
           labels: |

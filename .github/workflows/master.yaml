@@ -34,8 +34,8 @@ jobs:
       - name: Build container image and push to Docker registry
         uses: docker/build-push-action@v2
         with:
-          file: Dockerfile.coffee
-          context: /build
+          file: build/Dockerfile.coffee
+          context: build
           push: true
           tags: ${{ steps.prepare_tag.outputs.docker_image_a }}
           labels: |
@@ -45,8 +45,8 @@ jobs:
       - name: Build container image and push to Docker registry
         uses: docker/build-push-action@v2
         with:
-          file: Dockerfile.tea
-          context: /build
+          file: build/Dockerfile.tea
+          context: build
           push: true
           tags: ${{ steps.prepare_tag.outputs.docker_image_b }}
           labels: |

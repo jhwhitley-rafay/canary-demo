@@ -17,7 +17,7 @@ spec:
       containers:
         - name: canary-demo-coffee
           image: registry.rafay.us/canary-demo:coffee
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80
@@ -42,7 +42,7 @@ spec:
       containers:
         - name: canary-demo-tea
           image: registry.rafay.us/canary-demo:tea
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80

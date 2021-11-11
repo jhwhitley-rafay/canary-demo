@@ -1,7 +1,8 @@
 var ref;
 
 function checkRefresh() {
-    if ( document.cookie == "refresh=1" ) {
+    const refresh = document.cookie.split('; ').find(row => row.startsWith('refresh='));
+    if ( typeof refresh !== "undefined" ) {
         document.getElementById("check").checked = true;
         ref = setTimeout( function() { location.reload(); }, 1000 );
     }

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app-coffee
+  annotations:
+    rafay.dev/registry-ko8r76m: registry-rafay-us
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-app-coffee
+  template:
+    metadata:
+      labels:
+        app: demo-app-coffee
+    spec:
+      containers:
+        - name: demo-app-coffee
+          image: registry.rafay.us/demo-app-coffee:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+      terminationGracePeriodSeconds: 0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app-tea
+  annotations:
+    rafay.dev/registry-ko8r76m: registry-rafay-us
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-app-tea
+  template:
+    metadata:
+      labels:
+        app: demo-app-tea
+    spec:
+      containers:
+        - name: demo-app-tea
+          image: registry.rafay.us/demo-app-tea:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+      terminationGracePeriodSeconds: 0

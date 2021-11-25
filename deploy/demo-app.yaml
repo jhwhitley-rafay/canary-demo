@@ -22,7 +22,7 @@ spec:
             - name: http
               containerPort: 80
             - name: https
-              containerport: 443
+              containerPort: 443
       terminationGracePeriodSeconds: 0
 ---
 apiVersion: apps/v1
